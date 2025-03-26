@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Core.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,7 +11,9 @@ namespace Infrastucture.Entities
 	{
 		public string Origin { get; set; }
 		public string Destination { get; set; }
-		public string Stops { get; set; } // JSON formatted stops
+		public ICollection<RouteStop> RouteStops { get; set; } = new List<RouteStop>();
 		public ICollection<Trip> Trips { get; set; }
+		public ICollection<Buses> Buses { get; set; }
+
 	}
 }

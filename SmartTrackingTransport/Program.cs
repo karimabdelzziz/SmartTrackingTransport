@@ -5,6 +5,7 @@ using Infrastucture.DbContexts;
 using Infrastucture.IdentityEntities;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Services.Services.BusService;
 using Services.Services.IEmailService;
 using Services.Services.TokenService;
 using Services.Services.UserService;
@@ -39,7 +40,10 @@ namespace SmartTrackingTransport
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IUserService, UserService>();
 			builder.Services.AddScoped<IEmailService, EmailService>();
+            builder.Services.AddScoped<IBusRepository, BusRepository>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IBusService,BusService>();
 			builder.Services.AddIdentityService(builder.Configuration);
 			var app = builder.Build();
 

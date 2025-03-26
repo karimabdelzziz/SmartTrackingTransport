@@ -4,14 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Infrastucture.Entities
+namespace Services.Services.StopsService.DTO
 {
-	public class TrackingData : BaseEntity
+	public class StopsDto
 	{
-		public int BusId { get; set; }
+		public string Name { get; set; }
 		public decimal Latitude { get; set; }
 		public decimal Longitude { get; set; }
-		public DateTime Timestamp { get; set; } = DateTime.UtcNow;
-		public Buses Bus { get; set; }
 	}
 }

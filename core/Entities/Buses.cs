@@ -16,7 +16,11 @@ namespace Infrastucture.Entities
 		public decimal CurrentLongitude { get; set; }
 		public int? DriverId { get; set; }
 		public Driver Driver { get; set; }
+		public int? RouteId { get; set; }
+		public Route Route { get; set; }
 		public ICollection<Trip> Trips { get; set; }
+
+		//well be deleted if we use websocket
 		public ICollection<TrackingData> TrackingData { get; set; }
 	}
 }

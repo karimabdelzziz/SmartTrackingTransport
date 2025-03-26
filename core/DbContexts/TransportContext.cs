@@ -1,4 +1,5 @@
-﻿using Infrastucture.Entities;
+﻿using Core.Entities;
+using Infrastucture.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,8 @@ namespace Infrastucture.DbContexts
 		public DbSet<Buses> Buses { get; set; }
 		public DbSet<Route> Routes { get; set; }
 		public DbSet<Trip> Trips { get; set; }
+		public DbSet<Stops> Stops { get; set; }
+
 		public DbSet<TrackingData> TrackingData { get; set; }
 		public DbSet<LostItem> LostItems { get; set; }
 

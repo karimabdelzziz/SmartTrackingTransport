@@ -9,29 +9,29 @@ namespace Infrastructure.Repos
 {
 	public class GenericRepository<T> : IGenericRepository<T> where T : BaseEntity
 	{
-		private readonly TransportContext transportContext;
+		protected readonly TransportContext _transportContext;
 
 		public GenericRepository(TransportContext transportContext)
 		{
-			this.transportContext = transportContext;
+			_transportContext = transportContext;
 		}
 		public async Task Add(T entity)
 
-		   => await transportContext.Set<T>().AddAsync(entity);
+		   => await _transportContext.Set<T>().AddAsync(entity);
 		
 
 		public void Delete(T entity)
-			=> transportContext.Set<T>().Remove(entity);
+			=> _transportContext.Set<T>().Remove(entity);
 
 		public async Task<IReadOnlyList<T>> GetAllAsync()
-			=> await transportContext.Set<T>().ToListAsync();
+			=> await _transportContext.Set<T>().ToListAsync();
 
 
 		public async Task<T> GetByIdAsync(int? id)
-			=> await transportContext.Set<T>().FindAsync(id);
+			=> await _transportContext.Set<T>().FindAsync(id);
 
 		public void Update(T entity)
-		    => transportContext.Set<T>().Update(entity);
+		    => _transportContext.Set<T>().Update(entity);
 
 	}
 }

@@ -4,6 +4,7 @@ using Infrastucture.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Core.Migrations
 {
     [DbContext(typeof(TransportContext))]
-    partial class TransportContextModelSnapshot : ModelSnapshot
+    [Migration("20250317165830_secmigration")]
+    partial class secmigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,47 +24,6 @@ namespace Core.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Core.Entities.RouteStop", b =>
-                {
-                    b.Property<int>("RouteId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("StopId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.HasKey("RouteId", "StopId");
-
-                    b.HasIndex("StopId");
-
-                    b.ToTable("RouteStop");
-                });
-
-            modelBuilder.Entity("Core.Entities.Stops", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("Latitude")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Longitude")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Stops");
-                });
 
             modelBuilder.Entity("Infrastucture.Entities.Buses", b =>
                 {
@@ -95,7 +57,7 @@ namespace Core.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("RouteId")
+                    b.Property<int>("RouteId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -193,6 +155,10 @@ namespace Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Stops")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Routes");
@@ -279,25 +245,6 @@ namespace Core.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("Core.Entities.RouteStop", b =>
-                {
-                    b.HasOne("Infrastucture.Entities.Route", "Route")
-                        .WithMany("RouteStops")
-                        .HasForeignKey("RouteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Core.Entities.Stops", "Stop")
-                        .WithMany("RouteStops")
-                        .HasForeignKey("StopId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Route");
-
-                    b.Navigation("Stop");
-                });
-
             modelBuilder.Entity("Infrastucture.Entities.Buses", b =>
                 {
                     b.HasOne("Infrastucture.Entities.Driver", "Driver")
@@ -307,7 +254,9 @@ namespace Core.Migrations
 
                     b.HasOne("Infrastucture.Entities.Route", "Route")
                         .WithMany("Buses")
-                        .HasForeignKey("RouteId");
+                        .HasForeignKey("RouteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Driver");
 
@@ -344,11 +293,6 @@ namespace Core.Migrations
                     b.Navigation("Route");
                 });
 
-            modelBuilder.Entity("Core.Entities.Stops", b =>
-                {
-                    b.Navigation("RouteStops");
-                });
-
             modelBuilder.Entity("Infrastucture.Entities.Buses", b =>
                 {
                     b.Navigation("TrackingData");
@@ -365,8 +309,6 @@ namespace Core.Migrations
             modelBuilder.Entity("Infrastucture.Entities.Route", b =>
                 {
                     b.Navigation("Buses");
-
-                    b.Navigation("RouteStops");
 
                     b.Navigation("Trips");
                 });
