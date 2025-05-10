@@ -1,4 +1,5 @@
-﻿using Services.Services.UserService.Dto;
+﻿using Infrastucture.IdentityEntities;
+using Services.Services.UserService.Dto;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,9 @@ namespace Services.Services.UserService
 	{
 		Task<UserDto> Register(RegisterDto registerDto);
 		Task<UserDto> LogIn(LogInDto logInDto);
-		//Task<UserDto> GetCurrentUser();
+
+		Task<UserDto> CreateToken(AppUser appUser);
+		Task<UserDto> GetCurrentUser();
+		Task<UserDto> UpdateCurrentUser(string? displayName, string? email);
 	}
 }

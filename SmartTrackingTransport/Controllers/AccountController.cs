@@ -1,16 +1,12 @@
 ﻿using Infrastucture.IdentityEntities;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Exceptions;
-using NETCore.MailKit.Core;
-using Refit;
-using Services.Services.TokenService;
 using Services.Services.UserService;
 using Services.Services.UserService.Dto;
-using Services.Services.IEmailService;
 using SmartTrackingTransport.Extensions.ExceptionsHandler;
 using System.Security.Claims;
+using Google.Apis.Auth;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace SmartTrackingTransport.Controllers
@@ -49,20 +45,23 @@ namespace SmartTrackingTransport.Controllers
 			return Ok(user);
 		}
 		[HttpGet("getCurrentUser")]
-		[Microsoft.AspNetCore.Authorization.Authorize]
-		public async Task<ActionResult<UserDto>> GetCurrentUser()	
+		[Authorize]
+		public async Task<ActionResult<UserDto>> GetCurrentUser()
 		{
-			var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
-			if (email == null) return Unauthorized("User not found");
+			var user = await _userService.GetCurrentUser();
+			if (user == null)
+				return Unauthorized("User not found or token is invalid.");
 
-			var user = await _userManager.FindByEmailAsync(email);
-			if (user == null) return NotFound("User does not exist");
-
-			return new UserDto
-			{
-				DisplayName = user.DisplayName,
-				Email = user.Email
-			};
+			return Ok(user);
+		}
+		[HttpPut("UpdatecurrentUser")]
+		[Authorize]
+		public async Task<ActionResult<UserDto>> UpdateCurrentUser([FromQuery] string? displayName, [FromQuery] string? email)
+		{
+			var result = await _userService.UpdateCurrentUser(displayName, email);
+			if (result == null)
+				return BadRequest("Failed to update user");
+			return Ok(result);
 		}
 		[HttpPost("reset-password-request")]
 		public async Task<IActionResult> ResetPasswordRequest([FromBody] ResetPasswordRequestDto dto)
@@ -74,11 +73,9 @@ namespace SmartTrackingTransport.Controllers
 			var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
 
-			//for testing
-			Console.WriteLine("Generated Token: " + token);
-
+			
 			// Create email content
-			var resetLink = $"https://localhost:7130/reset-password?email={dto.Email}&code={Uri.EscapeDataString(token)}";
+			var resetLink = $"myapp://reset-password?email={dto.Email}&code={Uri.EscapeDataString(token)}";
 			var emailBody = $@"
         <p>Hello,</p>
         <p>You requested a password reset. Click the link below to reset your password:</p>
@@ -100,10 +97,36 @@ namespace SmartTrackingTransport.Controllers
 			var result = await _userManager.ResetPasswordAsync(user, dto.Code, dto.NewPassword);
 			if (!result.Succeeded)
 			{
-				return BadRequest(result.Errors);
+				var errors = result.Errors.Select(e => e.Description);
+				return BadRequest(new { Errors = errors });
 			}
 
 			return Ok("Password reset successfully");
 		}
+		[HttpPost("google-login")]
+		public async Task<ActionResult<UserDto>> GoogleLogin([FromBody] string idToken)
+		{
+			var payload = await GoogleJsonWebSignature.ValidateAsync(idToken);
+
+			var user = await _userManager.FindByEmailAsync(payload.Email);
+			if (user == null)
+			{
+				user = new AppUser
+				{
+					UserName = payload.Email,
+					Email = payload.Email,
+					DisplayName = payload.Name
+				};
+
+				var result = await _userManager.CreateAsync(user);
+				if (!result.Succeeded)
+					return BadRequest("User creation failed");
+			}
+
+			var userDto = await _userService.CreateToken(user);
+			return Ok(userDto);
+		}
+		
+
 	}
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Core.Entities
 {
-	public class RouteStop
+	public class RouteStop : BaseEntity
 	{
 		public int RouteId { get; set; }
 		public Route Route { get; set; }

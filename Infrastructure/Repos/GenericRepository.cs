@@ -2,6 +2,7 @@
 using Infrastucture.DbContexts;
 using Infrastructure.Interfaces;
 using Infrastucture.Entities;
+using System.Linq.Expressions;
 
 
 
@@ -32,6 +33,12 @@ namespace Infrastructure.Repos
 
 		public void Update(T entity)
 		    => _transportContext.Set<T>().Update(entity);
+		public async Task<IReadOnlyList<T>> FindAllAsync(Expression<Func<T, bool>> predicate)
+		{
+			// Using the predicate to filter the entities
+			return await _transportContext.Set<T>().Where(predicate).ToListAsync();
+		}
 
 	}
+
 }

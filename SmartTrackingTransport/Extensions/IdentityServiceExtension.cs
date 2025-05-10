@@ -25,6 +25,10 @@ namespace SmartTrackingTransport.Extensions
 					ValidIssuer = _config["Token:Issuer"],
 					ValidateAudience = false
 				};
+			}).AddGoogle(googleOptions =>
+			{
+				googleOptions.ClientId = _config["Authentication:Google:ClientId"];
+				googleOptions.ClientSecret = _config["Authentication:Google:ClientSecret"];
 			});
 			return services;
 		}

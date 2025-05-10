@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,10 +13,12 @@ namespace Infrastructure.Repos
 {
 	public class BusRepository : IBusRepository
 	{
+		protected readonly TransportContext _transportContext;
 
-		public BusRepository()
+
+		public BusRepository(TransportContext transportContext)
 		{
-			
+			_transportContext = transportContext;
 		}
 		public Task Add(Buses entity)
 		{
@@ -23,6 +26,11 @@ namespace Infrastructure.Repos
 		}
 
 		public void Delete(Buses entity)
+		{
+			throw new NotImplementedException();
+		}
+
+		public Task<IReadOnlyList<Buses>> FindAllAsync(Expression<Func<Buses, bool>> predicate)
 		{
 			throw new NotImplementedException();
 		}

@@ -10,6 +10,7 @@ using Services.Services.IEmailService;
 using Services.Services.TokenService;
 using Services.Services.UserService;
 using SmartTrackingTransport.Extensions;
+using SmartTrackingTransport.Mappings;
 
 
 namespace SmartTrackingTransport
@@ -22,9 +23,15 @@ namespace SmartTrackingTransport
             builder.AddServiceDefaults();
 
             // Add services to the container.
-           
+
             builder.Services.AddControllers();
-		
+            builder.Services.AddCors(options =>
+            {
+				options.AddPolicy("AllowAll", builder =>
+			builder.AllowAnyOrigin()
+				   .AllowAnyMethod()
+				   .AllowAnyHeader());
+			});
 			// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 			builder.Services.AddDbContext<AppIdentityDbContext>(options =>
             {
@@ -34,8 +41,11 @@ namespace SmartTrackingTransport
 			{
 				options.UseSqlServer(builder.Configuration.GetConnectionString("AppDbConnection"));
 			});
+			builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 			builder.Services.AddOpenApi();
             //builder.Services.AddSwaggerGen();
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddSwaggerDocumentation();
             builder.Services.AddScoped<ITokenService, TokenService>();
             builder.Services.AddScoped<IUserService, UserService>();
@@ -50,14 +60,14 @@ namespace SmartTrackingTransport
             app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
+           
                 app.UseSwagger();
                 app.UseSwaggerUI();
                 
-            }
+            
+			app.UseCors("AllowAll");
 
-            app.UseHttpsRedirection();
+			app.UseHttpsRedirection();
 			app.UseAuthentication();
 
 			app.UseAuthorization();
