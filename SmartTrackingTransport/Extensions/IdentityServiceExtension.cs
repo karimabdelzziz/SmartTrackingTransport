@@ -9,13 +9,32 @@ namespace SmartTrackingTransport.Extensions
 {
 	public static class IdentityServiceExtension
 	{
-		public static IServiceCollection AddIdentityService(this IServiceCollection services , IConfiguration _config) {
-			var builder = services.AddIdentityCore<AppUser>();
-			builder = new IdentityBuilder(builder.UserType,builder.Services);
-			builder.AddEntityFrameworkStores<AppIdentityDbContext>();
-			builder.AddSignInManager<SignInManager<AppUser>>();
-			builder.AddDefaultTokenProviders();
-			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+		public static IServiceCollection AddIdentityService(this IServiceCollection services, IConfiguration _config)
+		{
+			// Change from AddIdentityCore to AddIdentity to include all features including roles
+			services.AddIdentity<AppUser, IdentityRole>(opt =>
+			{
+				// Password settings
+				opt.Password.RequireDigit = true;
+				opt.Password.RequireLowercase = true;
+				opt.Password.RequireUppercase = true;
+				opt.Password.RequireNonAlphanumeric = true;
+				opt.Password.RequiredLength = 6;
+
+				// User settings
+				opt.User.RequireUniqueEmail = true;
+			})
+			.AddEntityFrameworkStores<AppIdentityDbContext>()
+			.AddSignInManager<SignInManager<AppUser>>()
+			.AddRoleManager<RoleManager<IdentityRole>>() // Add RoleManager
+			.AddDefaultTokenProviders();
+
+			services.AddAuthentication(options =>
+			{
+				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+			})
+			.AddJwtBearer(options =>
 			{
 				options.TokenValidationParameters = new TokenValidationParameters
 				{
@@ -25,11 +44,13 @@ namespace SmartTrackingTransport.Extensions
 					ValidIssuer = _config["Token:Issuer"],
 					ValidateAudience = false
 				};
-			}).AddGoogle(googleOptions =>
+			})
+			.AddGoogle(googleOptions =>
 			{
 				googleOptions.ClientId = _config["Authentication:Google:ClientId"];
 				googleOptions.ClientSecret = _config["Authentication:Google:ClientSecret"];
 			});
+
 			return services;
 		}
 	}

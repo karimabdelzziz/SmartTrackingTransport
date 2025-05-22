@@ -7,6 +7,7 @@ using SmartTrackingTransport.Extensions.ExceptionsHandler;
 using System.Security.Claims;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Twilio.Jwt.AccessToken;
 
 
 namespace SmartTrackingTransport.Controllers
@@ -73,9 +74,9 @@ namespace SmartTrackingTransport.Controllers
 			var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
 
-			
+
 			// Create email content
-			var resetLink = $"myapp://reset-password?email={dto.Email}&code={Uri.EscapeDataString(token)}";
+			var resetLink = $"http://smarttrackingapp.runasp.net/redirect-to-app?email={dto.Email}&code={Uri.EscapeDataString(token)}";
 			var emailBody = $@"
         <p>Hello,</p>
         <p>You requested a password reset. Click the link below to reset your password:</p>
@@ -87,6 +88,40 @@ namespace SmartTrackingTransport.Controllers
 
 			return Ok("Password reset email sent");
 		}
+		[HttpGet("redirect-to-app")]
+		public IActionResult RedirectToApp([FromQuery] string email, [FromQuery] string code)
+		{
+			if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(code))
+			{
+				return BadRequest("Missing email or code");
+			}
+
+			var customUrl = $"myapp://reset?email={email}&code={Uri.EscapeDataString(code)}";
+
+			return Redirect(customUrl);
+		}
+		/*
+		[HttpGet("reset-password")]
+		public IActionResult ResetPassword([FromQuery] string email, [FromQuery] string code)
+		{
+			var user = _userManager.FindByEmailAsync(email).Result;
+			if (user == null)
+			{
+				return NotFound("User not found");
+			}
+
+			var isValidToken = _userManager.VerifyUserTokenAsync(user, TokenOptions.DefaultProvider, "ResetPassword", code).Result;
+			if (!isValidToken)
+			{
+				return BadRequest("Invalid or expired token");
+			}
+
+			// Token is valid, send a response to navigate to reset password page in the app
+			var resetUrl = $"http://smarttrackingapp.runasp.net/reset-password?email={email}&code={Uri.EscapeDataString(code)}";
+
+			return Ok(new { message = "Token is valid, please proceed with setting a new password", resetUrl });
+		}
+		*/
 		[HttpPost("reset-password")]
 		public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
 		{

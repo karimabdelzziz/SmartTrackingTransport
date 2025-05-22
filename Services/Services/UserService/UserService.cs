@@ -1,4 +1,5 @@
-﻿using Infrastucture.Entities;
+﻿using Core.IdentityEntities;
+using Infrastucture.Entities;
 using Infrastucture.IdentityEntities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -29,20 +30,22 @@ namespace Services.Services.UserService
 
 		public async Task<UserDto> CreateToken(AppUser appUser)
 		{
-			var token = _tokenService.CreateToken(appUser); 
+			var token = await _tokenService.CreateToken(appUser);
+			var roles = await _userManager.GetRolesAsync(appUser);
 
 			return new UserDto
 			{
 				DisplayName = appUser.DisplayName,
 				Email = appUser.Email,
-				Token = token
+				Token = token,
+				Roles = roles
 			};
 		}
 
 		public async Task<UserDto> GetCurrentUser()
 		{
 			var email = _httpContextAccessor.HttpContext?.User?.Claims
-		.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+				.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
 
 			if (string.IsNullOrEmpty(email))
 				return null;
@@ -51,11 +54,15 @@ namespace Services.Services.UserService
 			if (user == null)
 				return null;
 
+			var roles = await _userManager.GetRolesAsync(user);
+			var token = await _tokenService.CreateToken(user);
+
 			return new UserDto
 			{
 				DisplayName = user.DisplayName,
 				Email = user.Email,
-				Token = _tokenService.CreateToken(user)
+				Token = token,
+				Roles = roles
 			};
 		}
 
@@ -64,14 +71,20 @@ namespace Services.Services.UserService
 			var user = await _userManager.FindByEmailAsync(logInDto.Email);
 			if (user == null)
 				return null;
-			var result =  await _signInManager.CheckPasswordSignInAsync(user, logInDto.Password,false);
+
+			var result = await _signInManager.CheckPasswordSignInAsync(user, logInDto.Password, false);
 			if (!result.Succeeded)
 				return null;
+
+			var roles = await _userManager.GetRolesAsync(user);
+			var token = await _tokenService.CreateToken(user);
+
 			return new UserDto
 			{
 				DisplayName = user.DisplayName,
 				Email = user.Email,
-				Token = _tokenService.CreateToken(user)
+				Token = token,
+				Roles = roles
 			};
 		}
 
@@ -87,15 +100,23 @@ namespace Services.Services.UserService
 				Email = registerDto.Email,
 				UserName = registerDto.Email.Split('@')[0]
 			};
-			var result = await _userManager.CreateAsync(appUser, registerDto.Password);
 
+			var result = await _userManager.CreateAsync(appUser, registerDto.Password);
 			if (!result.Succeeded)
 				return null;
+
+			// Assign default role to new user
+			await AssignDefaultRole(appUser);
+
+			var roles = await _userManager.GetRolesAsync(appUser);
+			var token = await _tokenService.CreateToken(appUser);
+
 			return new UserDto
 			{
 				DisplayName = appUser.DisplayName,
 				Email = appUser.Email,
-				Token = _tokenService.CreateToken(appUser)
+				Token = token,
+				Roles = roles
 			};
 		}
 
@@ -119,13 +140,57 @@ namespace Services.Services.UserService
 			var result = await _userManager.UpdateAsync(user);
 			if (!result.Succeeded) return null;
 
+			var roles = await _userManager.GetRolesAsync(user);
+			var token = await _tokenService.CreateToken(user);
+
 			return new UserDto
 			{
 				DisplayName = user.DisplayName,
 				Email = user.Email,
-				Token = _tokenService.CreateToken(user)
+				Token = token,
+				Roles = roles
 			};
 		}
+		public async Task<bool> AddUserToRole(string email, string roleName)
+		{
+			var user = await _userManager.FindByEmailAsync(email);
+			if (user == null) return false;
 
+			var result = await _userManager.AddToRoleAsync(user, roleName);
+			return result.Succeeded;
+		}
+
+		public async Task<bool> RemoveUserFromRole(string email, string roleName)
+		{
+			var user = await _userManager.FindByEmailAsync(email);
+			if (user == null) return false;
+
+			var result = await _userManager.RemoveFromRoleAsync(user, roleName);
+			return result.Succeeded;
+		}
+
+		public async Task<IList<string>> GetUserRoles(string email)
+		{
+			var user = await _userManager.FindByEmailAsync(email);
+			if (user == null) return new List<string>();
+
+			return await _userManager.GetRolesAsync(user);
+		}
+
+		public async Task<bool> IsInRole(string email, string roleName)
+		{
+			var user = await _userManager.FindByEmailAsync(email);
+			if (user == null) return false;
+
+			return await _userManager.IsInRoleAsync(user, roleName);
+		}
+
+		public async Task<bool> AssignDefaultRole(AppUser user)
+		{
+			// By default, assign the User role to new registrations
+			var result = await _userManager.AddToRoleAsync(user, AppRoles.User);
+			return result.Succeeded;
+		}
 	}
+
 }

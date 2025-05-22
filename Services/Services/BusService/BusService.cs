@@ -15,7 +15,7 @@ namespace Services.Services.BusService
 		private readonly IUnitOfWork _unitOfWork;
 		private readonly IMapper _mapper;
 
-		public BusService(IUnitOfWork unitOfWork,IMapper mapper)
+		public BusService(IUnitOfWork unitOfWork, IMapper mapper)
 		{
 			_unitOfWork = unitOfWork;
 			_mapper = mapper;
@@ -25,6 +25,24 @@ namespace Services.Services.BusService
 			var bus = _mapper.Map<Buses>(busDto);
 			await _unitOfWork.Repository<Buses>().Add(bus);
 			return await _unitOfWork.Complete() > 0;
+		}
+
+		public async Task<IEnumerable<BusDto>> GetAll()
+		{
+			var buses = await _unitOfWork.Repository<Buses>().GetAllAsync();
+			return  _mapper.Map<IEnumerable<BusDto>>(buses);
+     	}
+		public async Task<BusAbstractDto> GetBusAbstractAsync(int busId)
+		{
+			var bus = await _unitOfWork.BusRepository
+				.GetBusByIdWithRouteAsync(b => b.Id == busId,
+					includes: new[] { "Route.RouteStops.Stop" });
+
+			if (bus == null)
+				return null;
+
+			return _mapper.Map<BusAbstractDto>(bus);
+
 		}
 
 		// Still not implemented
@@ -72,5 +90,97 @@ namespace Services.Services.BusService
 			_unitOfWork.Repository<Buses>().Update(bus);
 			return await _unitOfWork.Complete() > 0;
 		}
+
+		public async Task<BusTripDetailsDto> GetBusTripDetailsAsync(int busId)
+		{
+			var bus = await _unitOfWork.BusRepository
+				.GetBusByIdWithRouteAsync(
+					b => b.Id == busId,
+					includes: new[] {
+						"Route.RouteStops.Stop",
+						"Trips",
+						"TrackingData"
+					}
+				);
+
+			if (bus == null)
+				return null;
+
+			return _mapper.Map<BusTripDetailsDto>(bus);
+		}
+		public async Task<BusTripsDto> GetBusTripsFromOriginAsync(string busNumber, string origin, DateTime date)
+		{
+			var bus = await _unitOfWork.BusRepository
+				.GetBusByIdWithRouteAsync(
+					b => b.LicensePlate == busNumber,
+					includes: new[] {
+						"Route.RouteStops.Stop",
+						"Trips.Route.RouteStops.Stop"
+					}
+				);
+
+			if (bus == null)
+				return null;
+
+			var startOfDay = date.Date;
+			var endOfDay = startOfDay.AddDays(1);
+
+			// Filter trips for the specified date and origin
+			var filteredTrips = bus.Trips
+				.Where(t => t.StartTime >= startOfDay && t.StartTime < endOfDay)
+				.Where(t => t.Route?.RouteStops?.Any(rs => rs.Stop?.Name == origin) ?? false)
+				.OrderBy(t => t.StartTime)
+				.ToList();
+
+			// Return a DTO with empty trips list instead of null
+			return new BusTripsDto
+			{
+				BusNumber = bus.LicensePlate,
+				Origin = origin,
+				TripsToday = filteredTrips.Select(t => new TripTimeDto
+				{
+					TripId = t.Id,
+					StartTime = t.StartTime
+				}).ToList()
+			};
+		}
+
+		public async Task<BusTripsDto> GetBusTripsToDestinationAsync(string busNumber, string destination, DateTime date)
+		{
+			var bus = await _unitOfWork.BusRepository
+				.GetBusByIdWithRouteAsync(
+					b => b.LicensePlate == busNumber,
+					includes: new[] {
+						"Route.RouteStops.Stop",
+						"Trips.Route.RouteStops.Stop"
+					}
+				);
+
+			if (bus == null)
+				return null;
+
+			var startOfDay = date.Date;
+			var endOfDay = startOfDay.AddDays(1);
+
+			// Filter trips for the specified date and destination
+			var filteredTrips = bus.Trips
+				.Where(t => t.StartTime >= startOfDay && t.StartTime < endOfDay)
+				.Where(t => t.Route?.RouteStops?.Any(rs => rs.Stop?.Name == destination) ?? false)
+				.OrderBy(t => t.StartTime)
+				.ToList();
+
+			// Return a DTO with empty trips list instead of null
+			return new BusTripsDto
+			{
+				BusNumber = bus.LicensePlate,
+				Destination = destination,
+				TripsToday = filteredTrips.Select(t => new TripTimeDto
+				{
+					TripId = t.Id,
+					StartTime = t.StartTime
+				}).ToList()
+			};
+		}
+
 	}
 }

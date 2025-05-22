@@ -1,12 +1,15 @@
-
+using Core.DbContexts;
 using Infrastructure.Interfaces;
 using Infrastructure.Repos;
 using Infrastucture.DbContexts;
+using Infrastucture.Entities;
 using Infrastucture.IdentityEntities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Services.Services.BusService;
 using Services.Services.IEmailService;
+using Services.Services.LostItemsService;
 using Services.Services.TokenService;
 using Services.Services.UserService;
 using SmartTrackingTransport.Extensions;
@@ -17,7 +20,7 @@ namespace SmartTrackingTransport
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.AddServiceDefaults();
@@ -54,10 +57,19 @@ namespace SmartTrackingTransport
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IBusService,BusService>();
+			builder.Services.AddScoped<ILostItemsService, LostItemService>();
 			builder.Services.AddIdentityService(builder.Configuration);
 			var app = builder.Build();
+			using (var scope = app.Services.CreateScope())
+			{
+				var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+				var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
 
-            app.MapDefaultEndpoints();
+				await AppIdentityDbContextSeed.SeedRolesAsync(roleManager);
+				await AppIdentityDbContextSeed.SeedDefaultAdminUserAsync(userManager);
+			}
+
+			app.MapDefaultEndpoints();
 
             // Configure the HTTP request pipeline.
            
@@ -75,6 +87,9 @@ namespace SmartTrackingTransport
             app.MapControllers();
 
             app.Run();
-        }
-    }
+
+			await app.RunAsync();
+
+		}
+	}
 }

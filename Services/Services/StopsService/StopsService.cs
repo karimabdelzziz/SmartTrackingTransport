@@ -28,7 +28,7 @@ namespace Services.Services.StopsService
 		// Get a stop by its ID
 		public async Task<StopsDto> GetStopByIdAsync(int stopId)
 		{
-			var stop = await _unitOfWork.Repository<RouteStop>().GetByIdAsync(stopId);
+			var stop = await _unitOfWork.Repository<Stops>().GetByIdAsync(stopId);
 			return stop == null ? null : _mapper.Map<StopsDto>(stop);
 		}
 	}

@@ -1,4 +1,5 @@
 ﻿using Infrastucture.IdentityEntities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -15,21 +16,28 @@ namespace Services.Services.TokenService
 	{
 		private readonly IConfiguration _config;
 		private readonly SymmetricSecurityKey _key;
+		private readonly UserManager<AppUser> _userManager;
 
-		public TokenService(IConfiguration config)
+		public TokenService(IConfiguration config, UserManager<AppUser> userManager)
 		{
 			_config = config;
+			_userManager = userManager;
 			_key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Token:Key"]));
 		}
 
-		public string CreateToken(AppUser appUser)
+		public async Task<string> CreateToken(AppUser appUser)
 		{
 			var claims = new List<Claim>
 			{
 				new Claim(ClaimTypes.Email, appUser.Email),
-				new Claim(ClaimTypes.GivenName,appUser.DisplayName)
+				new Claim(ClaimTypes.GivenName, appUser.DisplayName)
 			};
-			var credentials = new SigningCredentials(_key , SecurityAlgorithms.HmacSha256);
+
+			// Add roles to claims
+			var roles = await _userManager.GetRolesAsync(appUser);
+			claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+
+			var credentials = new SigningCredentials(_key, SecurityAlgorithms.HmacSha256);
 
 			var tokenDescriptor = new SecurityTokenDescriptor
 			{

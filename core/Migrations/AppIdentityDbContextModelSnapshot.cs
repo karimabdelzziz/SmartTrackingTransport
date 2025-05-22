@@ -47,7 +47,7 @@ namespace Infrastucture.Migrations
                     b.HasIndex("AppUserId")
                         .IsUnique();
 
-                    b.ToTable("Address");
+                    b.ToTable("Address", (string)null);
                 });
 
             modelBuilder.Entity("Core.IdentityEntities.AppUser", b =>

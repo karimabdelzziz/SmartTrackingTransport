@@ -8,7 +8,7 @@ namespace Services.Services.LostItemsService.DTO
 {
 	public class ReportLostItemDto
 	{
-		public int BusId { get; set; }
+		public string BusNumber { get; set; }
 		public string Description { get; set; }
 		public string ContactName { get; set; }
 		public string ContactPhone { get; set; }

@@ -40,7 +40,7 @@ namespace Core.Migrations
 
                     b.HasIndex("StopId");
 
-                    b.ToTable("RouteStop");
+                    b.ToTable("RouteStop", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.Stops", b =>
@@ -63,7 +63,7 @@ namespace Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Stops");
+                    b.ToTable("Stops", (string)null);
                 });
 
             modelBuilder.Entity("Infrastucture.Entities.Buses", b =>
@@ -141,7 +141,7 @@ namespace Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Drivers");
+                    b.ToTable("Drivers", (string)null);
                 });
 
             modelBuilder.Entity("Infrastucture.Entities.LostItem", b =>
@@ -177,7 +177,7 @@ namespace Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("LostItems");
+                    b.ToTable("LostItems", (string)null);
                 });
 
             modelBuilder.Entity("Infrastucture.Entities.Route", b =>
@@ -198,7 +198,7 @@ namespace Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Routes");
+                    b.ToTable("Routes", (string)null);
                 });
 
             modelBuilder.Entity("Infrastucture.Entities.TrackingData", b =>
@@ -225,7 +225,7 @@ namespace Core.Migrations
 
                     b.HasIndex("BusId");
 
-                    b.ToTable("TrackingData");
+                    b.ToTable("TrackingData", (string)null);
                 });
 
             modelBuilder.Entity("Infrastucture.Entities.Trip", b =>
@@ -254,7 +254,7 @@ namespace Core.Migrations
 
                     b.HasIndex("RouteId");
 
-                    b.ToTable("Trips");
+                    b.ToTable("Trips", (string)null);
                 });
 
             modelBuilder.Entity("Infrastucture.Entities.User", b =>
@@ -279,7 +279,7 @@ namespace Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Core.Entities.RouteStop", b =>

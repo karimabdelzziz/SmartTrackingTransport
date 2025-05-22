@@ -28,9 +28,9 @@ namespace Services.Services.LostItemsService
 			return item == null ? null : _mapper.Map<LostItemDto>(item);
 		}
 
-		public async Task<bool> AddLostItemAsync(LostItemDto lostItemDto)
+		public async Task<bool> AddLostItemAsync(ReportLostItemDto reportlostItemDto)
 		{
-			var item = _mapper.Map<LostItem>(lostItemDto);
+			var item = _mapper.Map<LostItem>(reportlostItemDto);
 			await _unitOfWork.Repository<LostItem>().Add(item);
 			return await _unitOfWork.Complete() > 0;
 		}

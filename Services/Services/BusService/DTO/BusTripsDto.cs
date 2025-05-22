@@ -6,14 +6,13 @@ using System.Threading.Tasks;
 
 namespace Services.Services.BusService.DTO
 {
-	public class BusDto
+	public class BusTripsDto
 	{
-		public int Id { get; set; }
-		public string LicensePlate { get; set; }
-		public string Model { get; set; }
-		public int Capacity { get; set; }
-		public string Status { get; set; }
+		public string BusNumber { get; set; }
 		public string Origin { get; set; }
 		public string Destination { get; set; }
+		public List<TripTimeDto> TripsToday { get; set; }
 	}
+
+	
 }

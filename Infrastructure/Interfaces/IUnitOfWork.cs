@@ -6,5 +6,7 @@ namespace Infrastructure.Interfaces
 	{
 		IGenericRepository<TEntity> Repository<TEntity>() where TEntity : BaseEntity;
 		Task<int> Complete();
+		IBusRepository BusRepository { get; }
+
 	}
 }

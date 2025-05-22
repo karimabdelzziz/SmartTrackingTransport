@@ -11,7 +11,7 @@ namespace Services.Services.LostItemsService
 	{
 		Task<IEnumerable<LostItemDto>> GetAllLostItemsAsync();
 		Task<LostItemDto> GetLostItemByIdAsync(int id);
-		Task<bool> AddLostItemAsync(LostItemDto lostItemDto);
+		Task<bool> AddLostItemAsync(ReportLostItemDto reportlostItemDto);
 		Task<bool> DeleteLostItemAsync(int id);
 	}
 }

@@ -14,11 +14,16 @@ namespace Infrastructure.Repos
 	{
 		private readonly TransportContext _context;
 		private Hashtable _repos;
+		private IBusRepository _busRepository;
 
-		public UnitOfWork(TransportContext context)
+		public UnitOfWork(TransportContext context, IBusRepository busRepository)
 		{
 			_context = context;
+			_busRepository = busRepository;
 		}
+
+		public IBusRepository BusRepository => _busRepository;
+
 		public async Task<int> Complete()
 			=> await _context.SaveChangesAsync();
 
@@ -26,14 +31,22 @@ namespace Infrastructure.Repos
 			=> _context.Dispose();
 		public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : BaseEntity
 		{
-			if(_repos == null)
+			if (_repos == null)
 				_repos = new Hashtable();
-			var type = typeof(TEntity).FullName;
-			if(!_repos.ContainsKey(type))
+			var type = typeof(TEntity).Name;
+			if (!_repos.ContainsKey(type))
 			{
-				var repoType = typeof(GenericRepository<>);
-				var repoInstance = Activator.CreateInstance(repoType.MakeGenericType(typeof(TEntity)),_context);
-				_repos.Add(type, repoInstance);
+				// Handle specialized repositories
+				if (typeof(TEntity) == typeof(Buses))
+				{
+					_repos.Add(type, _busRepository);
+				}
+				else
+				{
+					var repoType = typeof(GenericRepository<>);
+					var repoInstance = Activator.CreateInstance(repoType.MakeGenericType(typeof(TEntity)), _context);
+					_repos.Add(type, repoInstance);
+				}
 			}
 			return (IGenericRepository<TEntity>)_repos[type];
 		}

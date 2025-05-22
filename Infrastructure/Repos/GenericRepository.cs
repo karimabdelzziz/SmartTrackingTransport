@@ -19,7 +19,7 @@ namespace Infrastructure.Repos
 		public async Task Add(T entity)
 
 		   => await _transportContext.Set<T>().AddAsync(entity);
-		
+
 
 		public void Delete(T entity)
 			=> _transportContext.Set<T>().Remove(entity);
@@ -32,7 +32,7 @@ namespace Infrastructure.Repos
 			=> await _transportContext.Set<T>().FindAsync(id);
 
 		public void Update(T entity)
-		    => _transportContext.Set<T>().Update(entity);
+			=> _transportContext.Set<T>().Update(entity);
 		public async Task<IReadOnlyList<T>> FindAllAsync(Expression<Func<T, bool>> predicate)
 		{
 			// Using the predicate to filter the entities

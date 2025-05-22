@@ -16,5 +16,10 @@ namespace Services.Services.UserService
 		Task<UserDto> CreateToken(AppUser appUser);
 		Task<UserDto> GetCurrentUser();
 		Task<UserDto> UpdateCurrentUser(string? displayName, string? email);
+		Task<bool> AddUserToRole(string email, string roleName);
+		Task<bool> RemoveUserFromRole(string email, string roleName);
+		Task<IList<string>> GetUserRoles(string email);
+		Task<bool> IsInRole(string email, string roleName);
+		Task<bool> AssignDefaultRole(AppUser user);
 	}
 }

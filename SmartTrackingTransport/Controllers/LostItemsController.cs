@@ -31,9 +31,9 @@ namespace SmartTrackingTransport.Controllers
 		}
 
 		[HttpPost]
-		public async Task<ActionResult> AddLostItem([FromBody] LostItemDto lostItemDto)
+		public async Task<ActionResult> AddLostItem([FromBody] ReportLostItemDto reportlostItemDto)
 		{
-			var success = await _lostItemService.AddLostItemAsync(lostItemDto);
+			var success = await _lostItemService.AddLostItemAsync(reportlostItemDto);
 			if (!success) return BadRequest("Failed to add lost item.");
 			return Ok("Lost item added successfully.");
 		}
