@@ -181,11 +181,12 @@ namespace Services.Services.BusService
 				}).ToList()
 			};
 		}
-
+		/*
 		public async Task<IEnumerable<BusDto>> GetBusesNearLocationAsync(decimal latitude, decimal longitude, double radiusInKm = 5)
 		{
 			var buses = await _unitOfWork.BusRepository.GetBusesNearLocationAsync(latitude, longitude, radiusInKm);
 			return _mapper.Map<IEnumerable<BusDto>>(buses);
 		}
+		*/
 	}
 }

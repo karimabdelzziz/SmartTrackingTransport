@@ -94,6 +94,7 @@ namespace SmartTrackingTransport.Controllers
 
 			return Ok(trips);
 		}
+		/*
 		[HttpGet("nearby")]
 		public async Task<ActionResult<IEnumerable<BusDto>>> GetBusesNearLocation(
 			[FromQuery] decimal latitude,
@@ -106,6 +107,7 @@ namespace SmartTrackingTransport.Controllers
 			var buses = await _busService.GetBusesNearLocationAsync(latitude, longitude, radius);
 			return Ok(buses);
 		}
+		*/
 
 	}
 }

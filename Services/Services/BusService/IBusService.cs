@@ -20,7 +20,7 @@ namespace Services.Services.BusService
 		Task<bool> RemoveBusAsync(int id);
 		Task<BusDto> GetBusByIdAsync(int id);
 		Task<bool> UpdateBusStatusAsync(int id, string status);
-		Task<IEnumerable<BusDto>> GetBusesNearLocationAsync(decimal latitude, decimal longitude, double radiusInKm = 5.0);
+		//Task<IEnumerable<BusDto>> GetBusesNearLocationAsync(decimal latitude, decimal longitude, double radiusInKm = 5.0);
 
 
 	}
