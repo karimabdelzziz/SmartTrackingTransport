@@ -12,6 +12,9 @@ namespace Infrastructure.Interfaces
 	{
 		Task<IEnumerable<Buses>> GetAvailableBusesAsync(string startLocation, string destination);
 		Task<Buses> GetBusByIdWithRouteAsync(Expression<Func<Buses, bool>> predicate,string[] includes);
+		Task<IEnumerable<Buses>> GetAllBusesWithRouteAsync(string[] includes = null);
+		//Task<IEnumerable<Buses>> GetBusesNearLocationAsync(decimal latitude, decimal longitude, double radiusInKm = 5.0);
+
 
 	}
 }

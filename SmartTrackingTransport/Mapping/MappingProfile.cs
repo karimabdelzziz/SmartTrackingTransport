@@ -26,14 +26,18 @@ namespace SmartTrackingTransport.Mappings
 
 			// Bus mappings
 			CreateMap<Buses, BusDto>()
-							.ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
-							.ForMember(d => d.LicensePlate, o => o.MapFrom(s => s.LicensePlate))
-							.ForMember(d=>d.Capacity, o=> o.MapFrom(s=>s.Capacity))
-							.ForMember(d=>d.Status,o=>o.MapFrom(s=>s.Status))
-							.ForMember(d=>d.Model , o=> o.MapFrom(s=>s.Model))
-							.ForMember(d => d.Origin, o => o.MapFrom(s => s.Route.RouteStops.OrderBy(rs => rs.Order).FirstOrDefault().Stop.Name))
-				            .ForMember(d => d.Destination, o => o.MapFrom(s => s.Route.RouteStops.OrderByDescending(rs => rs.Order).FirstOrDefault().Stop.Name));
-
+					.ForMember(d => d.Id, o => o.MapFrom(s => s.Id))
+				.ForMember(d => d.LicensePlate, o => o.MapFrom(s => s.LicensePlate))
+				.ForMember(d => d.Capacity, o => o.MapFrom(s => s.Capacity))
+				.ForMember(d => d.Status, o => o.MapFrom(s => s.Status))
+				.ForMember(d => d.Model, o => o.MapFrom(s => s.Model))
+								.ForMember(d => d.Origin, o => o.MapFrom(s =>
+					s.Route != null && s.Route.RouteStops != null && s.Route.RouteStops.Any() ?
+					s.Route.RouteStops.OrderBy(rs => rs.Order).FirstOrDefault().Stop.Name : null))
+				.ForMember(d => d.Destination, o => o.MapFrom(s =>
+					s.Route != null && s.Route.RouteStops != null && s.Route.RouteStops.Any() ?
+					s.Route.RouteStops.OrderByDescending(rs => rs.Order).FirstOrDefault().Stop.Name : null));
+	
 			CreateMap<BusDto, Buses>()
 				.ForMember(d => d.Driver, o => o.Ignore())
 				.ForMember(d => d.Route, o => o.Ignore())
@@ -44,29 +48,13 @@ namespace SmartTrackingTransport.Mappings
 				.ForMember(d => d.BusNumber, o => o.MapFrom(s => s.LicensePlate))
 				.ForMember(d => d.Origin, o => o.MapFrom(s => s.Route.RouteStops.OrderBy(rs => rs.Order).FirstOrDefault().Stop.Name))
 				.ForMember(d => d.Destination, o => o.MapFrom(s => s.Route.RouteStops.OrderByDescending(rs => rs.Order).FirstOrDefault().Stop.Name));
-			
-			
+
+
 			CreateMap<Buses, BusTripDetailsDto>()
 				.ForMember(d => d.BusNumber, o => o.MapFrom(s => s.LicensePlate))
 				.ForMember(d => d.Origin, o => o.MapFrom(s => s.Route.RouteStops.OrderBy(rs => rs.Order).FirstOrDefault().Stop.Name))
 				.ForMember(d => d.Destination, o => o.MapFrom(s => s.Route.RouteStops.OrderByDescending(rs => rs.Order).FirstOrDefault().Stop.Name))
-				.ForMember(d => d.StartTime, o => o.MapFrom(s => s.Trips.OrderByDescending(t => t.StartTime).FirstOrDefault().StartTime))
-				.ForMember(d => d.EndTime, o => o.MapFrom(s => s.Trips.OrderByDescending(t => t.StartTime).FirstOrDefault().EndTime))
-				.ForMember(d => d.Stops, o => o.MapFrom(s => s.Route.RouteStops
-					.OrderBy(rs => rs.Order)
-					.Select(rs => new StopTimeDto
-					{
-						Stop = rs.Stop.Name,
-						Time = s.Trips.OrderByDescending(t => t.StartTime).FirstOrDefault().StartTime.AddMinutes(rs.Order * 20)
-					})))
-				.ForMember(d => d.LifeTrack, o => o.MapFrom(s => s.TrackingData
-					.OrderBy(td => td.Timestamp)
-					.Select(td => new LocationPointDto
-					{
-						Latitude = td.Latitude,
-						Longitude = td.Longitude,
-						Timestamp = td.Timestamp
-					})));
+				.ForMember(d => d.Stops, o => o.MapFrom(s => s.Route.RouteStops.OrderBy(rs => rs.Order).Select(rs => rs.Stop.Name).ToList()));
 
 			CreateMap<Buses, BusTripsDto>()
 				.ForMember(d => d.BusNumber, o => o.MapFrom(s => s.LicensePlate))

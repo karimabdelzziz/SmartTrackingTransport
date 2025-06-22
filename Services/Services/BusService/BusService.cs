@@ -29,9 +29,9 @@ namespace Services.Services.BusService
 
 		public async Task<IEnumerable<BusDto>> GetAll()
 		{
-			var buses = await _unitOfWork.Repository<Buses>().GetAllAsync();
-			return  _mapper.Map<IEnumerable<BusDto>>(buses);
-     	}
+			var buses = await _unitOfWork.BusRepository.GetAllBusesWithRouteAsync(includes: new[] { "Route.RouteStops.Stop" });
+			return _mapper.Map<IEnumerable<BusDto>>(buses);
+		}
 		public async Task<BusAbstractDto> GetBusAbstractAsync(int busId)
 		{
 			var bus = await _unitOfWork.BusRepository
@@ -182,5 +182,10 @@ namespace Services.Services.BusService
 			};
 		}
 
+		public async Task<IEnumerable<BusDto>> GetBusesNearLocationAsync(decimal latitude, decimal longitude, double radiusInKm = 5)
+		{
+			var buses = await _unitOfWork.BusRepository.GetBusesNearLocationAsync(latitude, longitude, radiusInKm);
+			return _mapper.Map<IEnumerable<BusDto>>(buses);
+		}
 	}
 }

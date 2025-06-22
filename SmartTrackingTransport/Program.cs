@@ -14,7 +14,7 @@ using Services.Services.TokenService;
 using Services.Services.UserService;
 using SmartTrackingTransport.Extensions;
 using SmartTrackingTransport.Mappings;
-
+//using Services.HostedServices;
 
 namespace SmartTrackingTransport
 {
@@ -59,6 +59,7 @@ namespace SmartTrackingTransport
             builder.Services.AddScoped<IBusService,BusService>();
 			builder.Services.AddScoped<ILostItemsService, LostItemService>();
 			builder.Services.AddIdentityService(builder.Configuration);
+			//builder.Services.AddHostedService<BusMovementService>();
 			var app = builder.Build();
 			using (var scope = app.Services.CreateScope())
 			{

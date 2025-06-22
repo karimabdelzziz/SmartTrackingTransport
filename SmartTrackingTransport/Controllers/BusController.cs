@@ -58,7 +58,7 @@ namespace SmartTrackingTransport.Controllers
 
 			return Ok(bus);
 		}
-		/*
+		
 		[HttpGet("{busNumber}/trips-from-origin")]
 		public async Task<ActionResult<BusTripsDto>> GetBusTripsFromOrigin(
 			string busNumber,
@@ -94,7 +94,18 @@ namespace SmartTrackingTransport.Controllers
 
 			return Ok(trips);
 		}
-		*/
+		[HttpGet("nearby")]
+		public async Task<ActionResult<IEnumerable<BusDto>>> GetBusesNearLocation(
+			[FromQuery] decimal latitude,
+			[FromQuery] decimal longitude,
+			[FromQuery] double radius = 5.0)
+		{
+			if (radius <= 0 || radius > 50)
+				return BadRequest(new { message = "Radius must be between 0 and 50 km" });
+
+			var buses = await _busService.GetBusesNearLocationAsync(latitude, longitude, radius);
+			return Ok(buses);
+		}
 
 	}
 }
